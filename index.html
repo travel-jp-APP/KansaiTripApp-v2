@@ -25,7 +25,6 @@
         const { useState, useEffect, useRef } = React;
 
         // --- Icons Components (模擬 Lucide React) ---
-        // 為了讓單一 HTML 運作，這裡將用到的 Icon SVG 直接定義
         const IconBase = ({ children, className, size = 24, ...props }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
                 {children}
@@ -89,8 +88,7 @@
               location: "滋賀縣草津市 (JR草津站旁)",
               features: ["交通便利", "美式風格", "適合自駕"],
               note: "作為滋賀縣人孔蓋卡收集的基地非常合適。",
-              image: "",
-              imageAlt: "草津波士頓廣場飯店外觀"
+              image: "Boston.jpg"
             },
             {
               name: "REF 京都八條口 by VESSEL HOTELS",
@@ -99,8 +97,7 @@
               location: "京都市南區 (京都站八條口)",
               features: ["大浴場", "現代日式", "免費迎賓飲料"],
               note: "靠近京都車站，方便前往神戶、奈良與回程機場。",
-              image: "",
-              imageAlt: "REF 京都八條口飯店大廳"
+              image: "Kyoto.jpg"
             }
           ],
           itinerary: [
@@ -1118,4 +1115,3 @@
     </script>
 </body>
 </html>
-
