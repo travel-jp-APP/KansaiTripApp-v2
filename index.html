@@ -43,7 +43,7 @@
         <div id="header-container" class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
             </div>
 
-        <div id="main-content-area" class="p-4 space-y-4">
+        <div id="main-content-area" class="p-4 space-y-4 min-h-[50vh]">
             </div>
 
         <div id="bottom-nav-container" class="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 md:max-w-md md:mx-auto pb-safe safe-area-bottom z-50">
@@ -86,7 +86,7 @@
                     location: "滋賀縣草津市 (JR草津站旁)",
                     features: ["交通便利", "美式風格", "適合自駕"],
                     note: "作為滋賀縣人孔蓋卡收集的基地非常合適。",
-                    image: "Boston.jpg" // 【新增圖片路徑】
+                    image: "Boston.jpg" 
                 },
                 {
                     name: "REF 京都八條口 by VESSEL HOTELS",
@@ -95,7 +95,7 @@
                     location: "京都市南區 (京都站八條口)",
                     features: ["大浴場", "現代日式", "免費迎賓飲料"],
                     note: "靠近京都車站，方便前往神戶、奈良與回程機場。",
-                    image: "Kyoto.jpg" // 【新增圖片路徑】
+                    image: "Kyoto.jpg"
                 }
             ],
             itinerary: [
@@ -289,7 +289,7 @@
         let activeTab = 'itinerary';
         let selectedDayId = 'day1';
 
-        // 重新繪製整個 App 的主要函式
+        // 重新繪製整個 App 的主要函式 (Optimized)
         function renderApp() {
             renderHeader();
             renderMainContent();
@@ -298,6 +298,11 @@
             // 每次狀態改變後，將頁面滾動到最頂端
             window.scrollTo({ top: 0, behavior: 'smooth' });
             
+            // 如果在行程頁面，確保日期選擇器滾動到正確位置
+            if (activeTab === 'itinerary') {
+                setTimeout(scrollToSelectedDayButton, 50);
+            }
+
             // 確保所有 Lucide 圖示被正確解析
             renderLucideIcons();
         }
@@ -505,10 +510,9 @@
                 const featuresHtml = hotel.features.map(f => `<span class="text-[10px] px-2 py-1 bg-indigo-50 text-indigo-600 rounded">${f}</span>`).join('');
 
                 // 【圖片優化】：使用內聯 style 動態設定圖片
-                // 修改處：將 h-24 改為 h-48 以拉長圖片
                 const imageDiv = `
                     <div 
-                        class="h-48"
+                        class="h-24"
                         style="
                             background-image: url('${hotel.image}'); 
                             background-size: cover; 
@@ -802,24 +806,39 @@
             headerContainer.innerHTML = headerBar + dateSelector;
         }
 
-        // Render Main Content Area
+        // Render Main Content Area (重寫優化版：快取 + 顯隱切換)
         function renderMainContent() {
             const contentArea = document.getElementById('main-content-area');
-            let contentHtml = '';
+            const sections = ['itinerary', 'flights', 'hotels', 'manhole', 'notes'];
 
-            if (activeTab === 'itinerary') {
-                contentHtml = renderItineraryTab();
-            } else if (activeTab === 'flights') {
-                contentHtml = renderFlightsTab();
-            } else if (activeTab === 'hotels') {
-                contentHtml = renderHotelsTab();
-            } else if (activeTab === 'manhole') {
-                contentHtml = renderManholeStockTab();
-            } else if (activeTab === 'notes') {
-                contentHtml = renderNotesTab();
+            // 1. 初始化 DOM 結構 (僅在第一次執行時建立所有容器)
+            // 檢查是否已經建立過容器 (透過 ID 判斷)
+            if (!document.getElementById('view-flights')) {
+                // 生成 Flights, Hotels, Manhole, Notes 的靜態 HTML
+                // 注意：Itinerary 是空的，因為稍後會動態填入
+                const initialHtml = `
+                    <div id="view-itinerary" class="view-section hidden"></div>
+                    <div id="view-flights" class="view-section hidden">${renderFlightsTab()}</div>
+                    <div id="view-hotels" class="view-section hidden">${renderHotelsTab()}</div>
+                    <div id="view-manhole" class="view-section hidden">${renderManholeStockTab()}</div>
+                    <div id="view-notes" class="view-section hidden">${renderNotesTab()}</div>
+                `;
+                contentArea.innerHTML = initialHtml;
             }
 
-            contentArea.innerHTML = contentHtml;
+            // 2. 切換顯示狀態
+            sections.forEach(section => {
+                const el = document.getElementById(`view-${section}`);
+                if (section === activeTab) {
+                    el.classList.remove('hidden');
+                    // 特殊處理：只有行程表需要動態更新 (因為日期會變)
+                    if (section === 'itinerary') {
+                        el.innerHTML = renderItineraryTab();
+                    }
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
         }
 
         // Render Bottom Navigation
@@ -873,7 +892,7 @@
             // 由於 renderApp() 每次都會重新繪製內容，我們需要在內容呈現後再次解析圖標
             setInterval(renderLucideIcons, 100); // 簡化處理，持續解析 Lucide 圖標
             // 初始滾動位置
-            setTimeout(scrollToSelectedDayButton, 0); 
+            setTimeout(scrollToSelectedDayButton, 100); 
         });
     </script>
 </body>
