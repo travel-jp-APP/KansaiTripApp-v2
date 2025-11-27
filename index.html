@@ -1,13 +1,23 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KANSAI TRIP - 行程</title>
+    <title>KANSAI TRIP</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide-react@latest/dist/lucide-react.min.js"></script>
+
     <style>
-        /* 隱藏滾動條的樣式 */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+        }
+
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -15,7 +25,6 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-        /* 頁面進入的動畫 */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -23,39 +32,29 @@
         .animate-fade-in-up {
             animation: fadeInUp 0.4s ease-out forwards;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
         .animate-fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
+            animation: fadeInUp 0.4s ease-out forwards;
         }
-        /* 確保底部安全區 */
         .pb-safe {
             padding-bottom: env(safe-area-inset-bottom);
         }
     </style>
 </head>
-<body class="bg-stone-100 font-sans text-stone-900">
+<body>
+    <div id="root"></div>
 
-    <div id="app-container" class="md:max-w-md md:mx-auto shadow-2xl overflow-hidden relative min-h-screen pb-20">
-        
-        <div id="header-container" class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
-            </div>
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        // 從 lucide-react 全域變數中解構圖示
+        const { 
+            MapPin, Navigation, Utensils, Train, Sun, CloudRain, Cloud, Snowflake, 
+            Info, ShoppingBag, Calendar, Plane, Hotel, Camera, Star, RefreshCw, 
+            CreditCard, Car, NotebookPen, ExternalLink 
+        } = lucideReact;
 
-        <div id="main-content-area" class="p-4 space-y-4">
-            </div>
-
-        <div id="bottom-nav-container" class="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 md:max-w-md md:mx-auto pb-safe safe-area-bottom z-50">
-            </div>
-        
-    </div>
-
-    <script>
-        // --- 1. Data Structure (已新增 image 屬性) ---
+        // --- Data Structure ---
         const TRIP_DATA = {
             flights: [
-                // ... flights data ... (保持不變)
                 {
                     type: "Departure",
                     date: "2025/12/27 (六)",
@@ -87,7 +86,7 @@
                     location: "滋賀縣草津市 (JR草津站旁)",
                     features: ["交通便利", "美式風格", "適合自駕"],
                     note: "作為滋賀縣人孔蓋卡收集的基地非常合適。",
-                    image: "Boston.jpg" // 【新增圖片路徑】
+                    image: "Boston.jpg" // 設定圖片
                 },
                 {
                     name: "REF 京都八條口 by VESSEL HOTELS",
@@ -96,13 +95,18 @@
                     location: "京都市南區 (京都站八條口)",
                     features: ["大浴場", "現代日式", "免費迎賓飲料"],
                     note: "靠近京都車站，方便前往神戶、奈良與回程機場。",
-                    image: "Kyoto.jpg" // 【新增圖片路徑】
+                    image: "Kyoto.jpg" // 設定圖片
                 }
             ],
             itinerary: [
-                // ... itinerary data ... (保持不變)
                 {
-                    id: "day1", date: "12/27", dayOfWeek: "六", location: "大阪 ➔ 滋賀", weather: "sunny", temp: "8°C", items: [
+                    id: "day1",
+                    date: "12/27",
+                    dayOfWeek: "六",
+                    location: "大阪 ➔ 滋賀",
+                    weather: "sunny",
+                    temp: "8°C",
+                    items: [
                         { type: "transport", time: "11:15", title: "搭乘 CX564 飛往大阪", note: "預計 14:55 抵達關西機場 T1" },
                         { type: "visit", time: "15:30", title: "臨空城觀光案內所", tag: "收集", note: "🔥 領取人孔蓋卡/紀念品。營業至20:00。", mapUrl: "https://maps.app.goo.gl/UVryLTpB5AXKVc8i7" },
                         { type: "shop", time: "16:00", title: "臨空城 Outlet", highlight: "必買: 運動品牌、日系服飾", note: "晚餐可在此解決。營業至20:00。" },
@@ -111,7 +115,13 @@
                     ]
                 },
                 {
-                    id: "day2", date: "12/28", dayOfWeek: "日", location: "滋賀自駕", weather: "cloudy", temp: "6°C", items: [
+                    id: "day2",
+                    date: "12/28",
+                    dayOfWeek: "日",
+                    location: "滋賀自駕",
+                    weather: "cloudy",
+                    temp: "6°C",
+                    items: [
                         { type: "transport", time: "08:00", title: "租車：Toyota Rent a Car", note: "草津站西口店取車。", mapUrl: "https://maps.app.goo.gl/XXatzeRDqj2tiShL8" },
                         { type: "visit", time: "09:40", title: "Kusatsu Yume-Honjin", tag: "收集", note: "くさつ夢本陣，領取人孔蓋卡。09:30開門。", parkingUrl: "https://maps.app.goo.gl/Lf1o3FuKd7LWJ36V9" },
                         { type: "visit", time: "10:20", title: "栗東観光案内所 (2F)", tag: "收集", note: "位於手原站。注意營業時間至12:00 (通常假日可能有變動，請優先前往)。" },
@@ -125,7 +135,13 @@
                     ]
                 },
                 {
-                    id: "day3", date: "12/29", dayOfWeek: "一", location: "海之京都", weather: "rain", temp: "4°C", items: [
+                    id: "day3",
+                    date: "12/29",
+                    dayOfWeek: "一",
+                    location: "海之京都",
+                    weather: "rain",
+                    temp: "4°C",
+                    items: [
                         { type: "visit", time: "09:00", title: "伊根灣賞景觀光船", highlight: "必拍: 舟屋群", note: "購買蝦條餵海鷗。遊覽時間約25分鐘。" },
                         { type: "visit", time: "10:30", title: "道の駅 海の京都 宮津", tag: "收集", note: "宮津觀光案內所領取人孔蓋卡。" },
                         { type: "food", time: "12:00", title: "午餐：天橋立周邊", highlight: "必吃: 蛤蠣丼 (Asari Don)", note: "推薦：富田屋 (海鮮超值)、Suginoya、海鮮工房。" },
@@ -135,7 +151,13 @@
                     ]
                 },
                 {
-                    id: "day4", date: "12/30", dayOfWeek: "二", location: "長濱/琵琶湖", weather: "cloudy", temp: "5°C", items: [
+                    id: "day4",
+                    date: "12/30",
+                    dayOfWeek: "二",
+                    location: "長濱/琵琶湖",
+                    weather: "cloudy",
+                    temp: "5°C",
+                    items: [
                         { type: "visit", time: "08:50", title: "竹生島觀光船", note: "從長濱港出發。竹生島是能量景點 (Power Spot)。" },
                         { type: "visit", time: "10:00", title: "竹生島 寶嚴寺", highlight: "投擲瓦片祈福", note: "參拜弁財天。" },
                         { type: "visit", time: "12:00", title: "黑壁廣場 (黑壁Square)", highlight: "必吃: 96Cafe 黑咖哩", note: "玻璃工藝品店林立，充滿大正浪漫氛圍。" },
@@ -144,7 +166,13 @@
                     ]
                 },
                 {
-                    id: "day5", date: "12/31", dayOfWeek: "三", location: "近江八幡", weather: "snow", temp: "3°C", items: [
+                    id: "day5",
+                    date: "12/31",
+                    dayOfWeek: "三",
+                    location: "近江八幡",
+                    weather: "snow",
+                    temp: "3°C",
+                    items: [
                         { type: "transport", time: "08:00", title: "日牟禮八幡宮前 無料駐車場（里道）", note: "新年參拜或遊覽八幡堀前停車。" },
                         { type: "visit", time: "09:00", title: "八幡山纜車 & 城跡", note: "眺望琵琶湖與西之湖美景。", mapUrl: "https://maps.app.goo.gl/xxNq6zPaK8AKbENc7" },
                         { type: "visit", time: "10:30", title: "八幡堀遊船", highlight: "時代劇取景地", note: "在充滿風情的水鄉乘船漫遊。" },
@@ -154,7 +182,13 @@
                     ]
                 },
                 {
-                    id: "day6", date: "1/1", dayOfWeek: "四", location: "神戶/初詣", weather: "sunny", temp: "7°C", items: [
+                    id: "day6",
+                    date: "1/1",
+                    dayOfWeek: "四",
+                    location: "神戶/初詣",
+                    weather: "sunny",
+                    temp: "7°C",
+                    items: [
                         { type: "transport", time: "08:00", title: "移動至京都並前往神戶", note: "先去 REF 京都飯店寄放行李，再搭阪急前往神戶三宮。", mapUrl: "https://maps.app.goo.gl/gdCQLpzYYo78Ros97" },
                         { type: "visit", time: "10:30", title: "生田神社", highlight: "戀愛結緣", note: "新年參拜 (初詣) 人潮眾多，請預留時間。", mapUrl: "https://maps.app.goo.gl/v7NQuRiXvfBZx2Rd6" },
                         { type: "visit", time: "12:00", title: "北野天滿神社", note: "位於異人館區的高點。" },
@@ -165,7 +199,13 @@
                     ]
                 },
                 {
-                    id: "day7", date: "1/2", dayOfWeek: "五", location: "奈良/宇治", weather: "sunny", temp: "6°C", items: [
+                    id: "day7",
+                    date: "1/2",
+                    dayOfWeek: "五",
+                    location: "奈良/宇治",
+                    weather: "sunny",
+                    temp: "6°C",
+                    items: [
                         { type: "visit", time: "08:30", title: "春日大社", highlight: "鹿與燈籠", note: "參道上的鹿群很可愛但請小心仙貝。" },
                         { type: "food", time: "11:00", title: "水谷茶屋", highlight: "茅草屋茶屋", note: "拍照超美，推薦烏龍麵或蕨餅。" },
                         { type: "visit", time: "12:30", title: "東大寺 & 二月堂", highlight: "世界最大木造建築", note: "必看大佛。二月堂可俯瞰奈良市景。" },
@@ -176,7 +216,13 @@
                     ]
                 },
                 {
-                    id: "day8", date: "1/3", dayOfWeek: "六", location: "京都巡禮", weather: "cloudy", temp: "5°C", items: [
+                    id: "day8",
+                    date: "1/3",
+                    dayOfWeek: "六",
+                    location: "京都巡禮",
+                    weather: "cloudy",
+                    temp: "5°C",
+                    items: [
                         { type: "visit", time: "08:30", title: "天龍寺 (嵐山)", highlight: "曹源池庭園", note: "世界遺產。早晨人較少，空氣清新。" },
                         { type: "visit", time: "10:30", title: "尋找鳳王人孔蓋", tag: "收集", note: "寶可夢人孔蓋『鳳王』位於京都（通常在公園或地標前）。", mapUrl: "https://maps.app.goo.gl/CJcLqbAjMk3WNXCF8" },
                         { type: "visit", time: "13:00", title: "仁和寺", note: "以御室櫻聞名（雖非花季），皇室淵源深厚。" },
@@ -186,7 +232,13 @@
                     ]
                 },
                 {
-                    id: "day9", date: "1/4", dayOfWeek: "日", location: "大阪 ➔ 台北", weather: "sunny", temp: "8°C", items: [
+                    id: "day9",
+                    date: "1/4",
+                    dayOfWeek: "日",
+                    location: "大阪 ➔ 台北",
+                    weather: "sunny",
+                    temp: "8°C",
+                    items: [
                         { type: "transport", time: "08:12", title: "前往大阪", note: "京都車站 → 大阪（寄放行李或直接前往景點）。" },
                         { type: "visit", time: "09:30", title: "ATC Green Eco Plaza", note: "位於南港。兼具環保教育與觀光。" },
                         { type: "visit", time: "11:00", title: "堺東観光案内所", tag: "收集", note: "領取堺市人孔蓋卡。" },
@@ -198,7 +250,6 @@
                 }
             ],
             manholeStock: [
-                // ... manholeStock data ... (保持不變)
                 { name: "臨空城案內所", region: "大阪", hours: "09:00–20:00", url: "https://www.city.izumisano.lg.jp/kakuka/jogesuidokyoku/jogesui/menu/1511934914176.html" },
                 { name: "大津車站觀光案内所", region: "滋賀", hours: "09:00–18:00", url: "https://www.city.otsu.lg.jp/kigyo/about/koho/68041.html", highlight: true },
                 { name: "くさつ夢本陣", region: "滋賀", hours: "09:00–17:00", url: "https://www.city.kusatsu.shiga.jp/kurashi/suidogesuido/gesuido/manholecard.html" },
@@ -225,16 +276,15 @@
                 { name: "泉佐野市観光情報センター", region: "大阪", hours: "10:00–16:00", url: "https://www.city.izumisano.lg.jp/kakuka/jogesuidokyoku/jogesui/menu/1511934914176.html" },
             ],
             notes: [
-                // ... notes data ... (保持不變)
                 {
                     date: "12/27（六）",
                     links: [
                         { title: "臨空城 Outlet 電子地圖", url: "https://platinumaps.jp/d/premiumoutlets-rinku?floor=1F", note: "Nike沒有免稅" }
                     ],
                     dining: [
-                        { name: "東京油組総本店 滋賀組", hours: "11:00–02:00" },
+                        { name: "東京油組総本店 滋賀組", hours: "11:00–02:00", mapUrl: "https://maps.app.goo.gl/w2thGKHypz1hWEqLA" },
                         { name: "麺屋EDITION草津店", hours: "17:00–02:45" },
-                        { name: "カマドのタコ", hours: "12:00–23:00 (居酒屋)" }
+                        { name: "カマドのタコ", hours: "12:00–23:00 (居酒屋)", mapUrl: "https://maps.app.goo.gl/gkScoEZv4zvpATxVA" }
                     ]
                 },
                 {
@@ -251,15 +301,15 @@
                         { title: "天橋立ビューランド (纜車)", url: "https://www.viewland.jp/tw/eigyou/", note: "1,000円" }
                     ],
                     dining: [
-                        { area: "傘松", spots: [{ name: "Suginoya", hours: "11:30–16:00" }] },
+                        { area: "傘松", spots: [{ name: "Suginoya", hours: "11:30–16:00", note: "烏冬" }] },
                         { area: "天橋立", spots: [{ name: "海鮮工房 橋立物產 松葉蟹直賣", hours: "11:00–17:00" }] },
                         { area: "宮津午餐", spots: [
-                            { name: "烏冬小吃大門", hours: "11:30–14:30、17:30–20:30" },
-                            { name: "こんぴらうどん", hours: "11:00–15:00" },
-                            { name: "富田屋", hours: "11:00–21:30" },
+                            { name: "烏冬小吃大門", hours: "11:30–14:30、17:30–20:30", mapUrl: "https://maps.app.goo.gl/2CctgmqhfxxJiCWC8" },
+                            { name: "こんぴらうどん", hours: "11:00–15:00", mapUrl: "https://maps.app.goo.gl/bfzeUDvUbtPwA8nY9" },
+                            { name: "富田屋", hours: "11:00–21:30", mapUrl: "https://maps.app.goo.gl/jhbLKnyyATwJEJT57" },
                             { name: "Seafood Kawasaki", hours: "11:00–13:30" },
-                            { name: "山海屋", hours: "11:00–22:00" },
-                          ] 
+                            { name: "山海屋", hours: "11:00–22:00", mapUrl: "https://maps.app.goo.gl/Bm3aLBaWHZshyaYL6" },
+                        ] 
                         },
                         { area: "宮津晚餐", spots: [{ name: "お食事処 割烹たんご", hours: "17:30–22:30" }] }
                     ]
@@ -270,7 +320,7 @@
                         {
                             area: "心齋橋",
                             spots: [
-                                { name: "寶可夢中心 大阪店 DX大丸心齋橋9F", hours: "10:00–20:00" },
+                                { name: "寶可夢中心 大阪店 DX大丸心齋橋9F", hours: "10:00–20:00", mapUrl: "https://maps.app.goo.gl/rRK97UJ6j4x9Hqax9" },
                                 { name: "CHIIKAWA LAND Shinsaibashi PARCO Store 6F", hours: "10:00–20:00" }
                             ]
                         },
@@ -279,7 +329,6 @@
                             spots: [
                                 { name: "寶可夢中心 大阪大丸梅田13F", hours: "10:00–20:00" },
                                 { name: "ちいかわらんど 大阪梅田店", hours: "10:00–20:00", note: "暫定阪急三番街南館B1 37號" },
-                                { name: "大阪観光案内所(JR車站內)", hours: "07:00–21:00" },
                                 { name: "らぁ麺 鴨と葱 梅田店", hours: "11:00–23:00" },
                                 { name: "梅田藍天大樓", hours: "09:30–22:00" },
                                 { name: "HEP FIVE 摩天輪7F", hours: "11:00–22:45" }
@@ -290,600 +339,395 @@
             ]
         };
 
-        // --- 2. State Management ---
-        let activeTab = 'itinerary';
-        let selectedDayId = 'day1';
+        // --- Helper Functions ---
+        const getGoogleMapUrl = (name) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`;
 
-        // 重新繪製整個 App 的主要函式
-        function renderApp() {
-            renderHeader();
-            renderMainContent();
-            renderBottomNav();
-            // 每次狀態改變後，將頁面滾動到最頂端
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            // 確保所有 Lucide 圖示被正確解析
-            renderLucideIcons();
-            // 確保日期按鈕在切換後滾動到正確位置
-            if (activeTab === 'itinerary') {
-                scrollToSelectedDayButton();
+        // --- Components ---
+        const WeatherIcon = ({ type }) => {
+            switch (type) {
+                case 'sunny': return <Sun className="w-5 h-5 text-orange-500" />;
+                case 'cloudy': return <Cloud className="w-5 h-5 text-gray-500" />;
+                case 'rain': return <CloudRain className="w-5 h-5 text-blue-500" />;
+                case 'snow': return <Snowflake className="w-5 h-5 text-cyan-400" />;
+                default: return <Sun className="w-5 h-5 text-orange-500" />;
             }
-        }
-
-        // 狀態變更器
-        function setActiveTabAndRender(tab) {
-            activeTab = tab;
-            renderApp();
-        }
-
-        function setSelectedDayIdAndRender(dayId) {
-            selectedDayId = dayId;
-            renderApp();
-        }
-
-        // --- 3. Icon Mapping & Utility Functions ---
-        // 來自 lucide-react 的圖示名稱 (這裡將轉換為 HTML/JS 的渲染方式)
-        const IconMap = {
-            MapPin: 'map-pin', Navigation: 'navigation', Utensils: 'utensils', Train: 'train', Sun: 'sun', CloudRain: 'cloud-rain', Cloud: 'cloud', Snowflake: 'snowflake', Info: 'info', ShoppingBag: 'shopping-bag', Calendar: 'calendar', Plane: 'plane', Hotel: 'hotel', Camera: 'camera', Star: 'star', CreditCard: 'credit-card', Car: 'car', NotebookPen: 'notebook-pen', ExternalLink: 'external-link'
         };
 
-        function getIconSVG(name, size = 18, classes = "", strokeWidth = 2) {
-            const iconName = IconMap[name];
-            // 在純 HTML 中，stroke-width 必須是小寫
-            return `<i data-lucide="${iconName}" class="${classes}" style="width: ${size}px; height: ${size}px; stroke-width: ${strokeWidth};"></i>`;
-        }
+        const Tag = ({ text, color }) => (
+            <span className={`text-[10px] px-2 py-0.5 rounded-full border ${color} font-medium mr-2`}>
+                {text}
+            </span>
+        );
 
-        function renderLucideIcons() {
-            // 每次渲染內容後，調用此函式來解析所有 [data-lucide] 標籤
-            if (typeof lucide !== 'undefined' && lucide.createIcons) {
-                lucide.createIcons();
-            }
-        }
-        
-        // 取得天氣圖示的 HTML
-        function getWeatherIconHtml(type) {
-            let iconName, color;
-            switch (type) {
-                case 'sunny': iconName = 'Sun'; color = 'text-orange-500'; break;
-                case 'cloudy': iconName = 'Cloud'; color = 'text-gray-500'; break;
-                case 'rain': iconName = 'CloudRain'; color = 'text-blue-500'; break;
-                case 'snow': iconName = 'Snowflake'; color = 'text-cyan-400'; break;
-                default: iconName = 'Sun'; color = 'text-orange-500'; break;
-            }
-            return getIconSVG(iconName, 20, `w-5 h-5 ${color}`);
-        }
-        
-        // 取得 Google 地圖連結
-        function getGoogleMapUrl(name) {
-            return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`;
-        }
+        const Card = ({ children, className = "" }) => (
+            <div className={`bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden ${className}`}>
+                {children}
+            </div>
+        );
 
-        // --- 4. Component Rendering Functions ---
+        const ItineraryItem = ({ item }) => {
+            let Icon = MapPin;
+            let iconColor = "text-stone-400";
+            let borderColor = "border-stone-200";
 
-        // A. Itinerary Item Component
-        function ItineraryItem(item) {
-            // ... (函式內容與您的 React 邏輯保持一致，但轉換為字串模板) ...
-             let IconName = 'MapPin', iconColor = "text-stone-400", borderColor = "border-stone-200";
-
-            if (item.type === 'food') { IconName = 'Utensils'; iconColor = "text-red-400"; borderColor = "border-l-red-400"; }
-            else if (item.type === 'shop') { IconName = 'ShoppingBag'; iconColor = "text-yellow-500"; borderColor = "border-l-yellow-500"; }
-            else if (item.type === 'visit') { IconName = 'Camera'; iconColor = "text-emerald-500"; borderColor = "border-l-emerald-500"; }
-            else if (item.type === 'hotel') { IconName = 'Hotel'; iconColor = "text-purple-400"; borderColor = "border-l-purple-400"; }
+            if (item.type === 'food') { Icon = Utensils; iconColor = "text-red-400"; borderColor="border-l-red-400"; }
+            else if (item.type === 'shop') { Icon = ShoppingBag; iconColor = "text-yellow-500"; borderColor="border-l-yellow-500"; }
+            else if (item.type === 'visit') { Icon = Camera; iconColor = "text-emerald-500"; borderColor="border-l-emerald-500"; }
+            else if (item.type === 'hotel') { Icon = Hotel; iconColor = "text-purple-400"; borderColor="border-l-purple-400"; }
             else if (item.type === 'transport') {
                 const isFlight = item.title.includes("CX564") || item.title.includes("CX565");
                 const isCarRelated = item.title.includes("租車") || item.title.includes("還車") || item.title.includes("駐車場");
-                if (isFlight) { IconName = 'Plane'; iconColor = "text-red-500"; borderColor = "border-l-red-500"; }
-                else if (isCarRelated) { IconName = 'Car'; iconColor = "text-lime-600"; borderColor = "border-l-lime-600"; }
-                else { IconName = 'Train'; iconColor = "text-indigo-400"; borderColor = "border-l-indigo-400"; }
+                if (isFlight) {
+                    Icon = Plane; iconColor = "text-red-500"; borderColor = "border-l-red-500";
+                } else if (isCarRelated) {
+                    Icon = Car; iconColor = "text-lime-600"; borderColor = "border-l-lime-600";
+                } else {
+                    Icon = Train; iconColor = "text-indigo-400"; borderColor = "border-l-indigo-400";
+                }
             }
+
             const isCollection = item.tag === "收集";
-            if (isCollection) { IconName = 'Star'; iconColor = "text-amber-500"; borderColor = "border-l-amber-500"; }
+            if (isCollection) {
+                Icon = Star; iconColor = "text-amber-500"; borderColor = "border-l-amber-500";
+            }
 
             const titlesWithoutNavigation = ["搭乘 CX564 飛往大阪", "搭乘 CX565 返台", "前往草津", "前往大阪"];
             const showNavigation = !titlesWithoutNavigation.includes(item.title) && item.mapUrl !== null;
-            const destinationUrl = item.mapUrl || getGoogleMapUrl(item.title);
+            const googleMapUrl = getGoogleMapUrl(item.title);
+            const destinationUrl = item.mapUrl || googleMapUrl;
 
-            const Tag = (text, isCollection) => `
-                <span class="text-[10px] px-2 py-0.5 rounded-full border ${isCollection ? "border-amber-400 text-amber-600 bg-amber-50" : "border-stone-300 text-stone-500"} font-medium mr-2">
-                    ${text}
-                </span>`;
-
-            const Highlight = (text) => `
-                <div class="mt-2 inline-block px-3 py-1 bg-red-50 text-red-600 text-xs rounded-md font-bold">
-                    ★ ${text}
-                </div>`;
-
-            const NavButton = (name) => `
-                <a 
-                    href="${getGoogleMapUrl(name)}"
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    title="目的地導航"
-                    class="p-1.5 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors shrink-0"
-                >
-                    ${getIconSVG('Navigation', 16)}
-                </a>
-            `;
-
-            return `
-                <div class="flex gap-4 p-4 bg-white rounded-lg border-l-4 shadow-sm mb-3 ${borderColor}">
-                    <div class="flex flex-col items-center min-w-[50px]">
-                        <span class="text-sm font-bold text-stone-600 font-mono">${item.time}</span>
-                        <div class="mt-2 p-1.5 rounded-full bg-stone-50 ${iconColor}">
-                            ${getIconSVG(IconName, 18)}
+            return (
+                <div className={`flex gap-4 p-4 bg-white rounded-lg border-l-4 shadow-sm mb-3 ${borderColor}`}>
+                    <div className="flex flex-col items-center min-w-[50px]">
+                        <span className="text-sm font-bold text-stone-600 font-mono">{item.time}</span>
+                        <div className={`mt-2 p-1.5 rounded-full bg-stone-50 ${iconColor}`}>
+                            <Icon size={18} />
                         </div>
-                        ${isCollection ? '<span class="text-[9px] text-amber-600 font-bold mt-1">GET!</span>' : ''}
+                        {isCollection && <span className="text-[9px] text-amber-600 font-bold mt-1">GET!</span>}
                     </div>
-                    
-                    <div class="flex-1">
-                        <div class="flex items-start justify-between">
-                            <h3 class="font-bold text-stone-800 text-lg leading-tight w-[calc(100%-70px)] sm:w-[calc(100%-110px)]">${item.title}</h3>
-                            
-                            <div class="flex gap-2 shrink-0"> 
-                                ${item.parkingUrl ? `
-                                    <a href="${item.parkingUrl}" target="_blank" rel="noopener noreferrer" title="停車位置導航" class="p-1.5 bg-sky-50 text-sky-600 rounded-full hover:bg-sky-100 transition-colors shrink-0">
-                                        ${getIconSVG('MapPin', 16)}
+                    <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                            <h3 className="font-bold text-stone-800 text-lg leading-tight w-[calc(100%-70px)] sm:w-[calc(100%-110px)]">{item.title}</h3>
+                            <div className="flex gap-2 shrink-0">
+                                {item.parkingUrl && (
+                                    <a href={item.parkingUrl} target="_blank" rel="noopener noreferrer" title="停車位置導航" className="p-1.5 bg-sky-50 text-sky-600 rounded-full hover:bg-sky-100 transition-colors shrink-0">
+                                        <MapPin size={16} />
                                     </a>
-                                ` : ''}
-                                ${showNavigation ? NavButton(item.title) : `<div class="w-7 h-7 shrink-0"></div>`}
+                                )}
+                                {showNavigation ? (
+                                    <a href={destinationUrl} target="_blank" rel="noopener noreferrer" title="目的地導航" className="p-1.5 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors shrink-0">
+                                        <Navigation size={16} />
+                                    </a>
+                                ) : (<div className="w-7 h-7 shrink-0"></div>)}
                             </div>
                         </div>
-
-                        ${item.tag ? `<div class="mt-1">${Tag(item.tag, isCollection)}</div>` : ''}
-                        ${item.highlight ? Highlight(item.highlight) : ''}
-
-                        ${item.note ? `
-                            <p class="mt-2 text-sm text-stone-500 leading-relaxed bg-stone-50 p-2 rounded border border-stone-100">
-                                ${item.note}
-                            </p>
-                        ` : ''}
+                        {item.tag && <div className="mt-1"><Tag text={item.tag} color={isCollection ? "border-amber-400 text-amber-600 bg-amber-50" : "border-stone-300 text-stone-500"} /></div>}
+                        {item.highlight && <div className="mt-2 inline-block px-3 py-1 bg-red-50 text-red-600 text-xs rounded-md font-bold">★ {item.highlight}</div>}
+                        {item.note && <p className="mt-2 text-sm text-stone-500 leading-relaxed bg-stone-50 p-2 rounded border border-stone-100">{item.note}</p>}
                     </div>
                 </div>
-            `;
-        }
-        
-        // B. Itinerary Tab Content
-        function renderItineraryTab() {
-            const currentDayData = TRIP_DATA.itinerary.find(d => d.id === selectedDayId);
-            if (!currentDayData) return '<p>找不到當日行程資訊。</p>';
+            );
+        };
 
-            const itemsHtml = currentDayData.items.map(ItineraryItem).join('');
-
-            return `
-                <div class="animate-fade-in-up">
-                    <div class="flex items-center justify-between mb-4 px-1">
-                        <h2 class="text-lg font-bold text-stone-700">
-                            Day ${selectedDayId.replace('day', '')} 
-                            <span class="ml-2 text-sm font-normal text-stone-500">${currentDayData.location}</span>
-                        </h2>
-                    </div>
-                    ${itemsHtml}
-                    <div class="h-10"></div> </div>
-            `;
-        }
-
-        // C. Flights Tab Content
-        function renderFlightsTab() {
-            const Card = (content) => `<div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">${content}</div>`;
-
-            const flightsHtml = TRIP_DATA.flights.map((flight, idx) => {
-                const isDeparture = flight.type === 'Departure';
-                const tagClass = isDeparture ? 'bg-indigo-100 text-indigo-700' : 'bg-orange-100 text-orange-700';
-                const tagText = isDeparture ? '去程' : '回程';
-
-                return Card(`
-                    <div class="p-5">
-                        <div class="flex items-center justify-between mb-4 border-b border-stone-100 pb-3">
-                            <span class="text-xs font-bold px-2 py-1 rounded ${tagClass}">
-                                ${tagText}
-                            </span>
-                            <span class="font-mono font-bold text-stone-500">${flight.date}</span>
-                        </div>
-                        <div class="flex justify-between items-center mb-2">
-                            <div class="text-3xl font-black text-stone-800">${flight.code}</div>
-                            ${getIconSVG('Plane', 24, 'text-stone-300 rotate-45')}
-                        </div>
-                        <div class="text-sm font-medium text-stone-600 mb-4">${flight.airline} • ${flight.class}</div>
-                        
-                        <div class="bg-stone-50 p-4 rounded-lg text-center border border-stone-100">
-                            <div class="text-lg font-bold text-stone-800 mb-1">${flight.route}</div>
-                            <div class="text-xs text-stone-500">${flight.terminal} • ${flight.duration} • ${flight.aircraft}</div>
-                        </div>
-                    </div>
-                `);
-            }).join('');
-
-            return `
-                <div class="space-y-4 animate-fade-in">
-                    <h2 class="text-xl font-bold text-stone-800 px-1">航班資訊</h2>
-                    ${flightsHtml}
-                </div>
-            `;
-        }
-
-        // D. Hotels Tab Content (已優化圖片部分)
-        function renderHotelsTab() {
-            // Card 函式現在接受 hotel 物件，以便在內部動態設定圖片
-            const Card = (content) => `<div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">${content}</div>`;
-
-            const hotelsHtml = TRIP_DATA.hotels.map((hotel, idx) => {
-                const mapUrl = getGoogleMapUrl(hotel.name);
-                const featuresHtml = hotel.features.map(f => `<span class="text-[10px] px-2 py-1 bg-indigo-50 text-indigo-600 rounded">${f}</span>`).join('');
-
-                // 【圖片優化】：使用內聯 style 替換原本的純色背景和 Hotel Icon
-                const imageDiv = `
-                    <div 
-                        class="h-24"
-                        style="
-                            background-image: url('${hotel.image}'); 
-                            background-size: cover; 
-                            background-repeat: no-repeat; 
-                            background-position: center center;
-                        "
-                    >
-                    </div>
-                `;
-
-                return Card(`
-                    ${imageDiv}
-                    <div class="p-5">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-lg font-bold text-stone-800 leading-tight w-3/4">${hotel.name}</h3>
-                            <span class="text-xs bg-stone-100 text-stone-600 px-2 py-1 rounded font-medium whitespace-nowrap">${hotel.dates}</span>
-                        </div>
-                        <p class="text-xs text-stone-400 mb-4 font-mono">${hotel.engName}</p>
-                        
-                        <div class="flex items-start gap-2 mb-4 text-sm text-stone-600">
-                            ${getIconSVG('MapPin', 16, 'mt-0.5 text-stone-400 shrink-0')}
-                            <span>${hotel.location}</span>
-                        </div>
-
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            ${featuresHtml}
-                        </div>
-
-                        <div class="bg-amber-50 p-3 rounded text-xs text-amber-800 border border-amber-100 flex gap-2">
-                            ${getIconSVG('Info', 14, 'shrink-0 mt-0.5')}
-                            ${hotel.note}
-                        </div>
-                        
-                        <a href="${mapUrl}" target="_blank" class="mt-4 block w-full py-2 bg-stone-800 text-white text-center rounded-lg text-sm font-bold hover:bg-stone-700 transition">
-                            導航至飯店
-                        </a>
-                    </div>
-                `);
-            }).join('');
-
-            return `
-                <div class="space-y-4 animate-fade-in">
-                    <h2 class="text-xl font-bold text-stone-800 px-1">住宿資訊</h2>
-                    ${hotelsHtml}
-                </div>
-            `;
-        }
-        
-        // E. Manhole Stock Tab Content
-        function renderManholeStockTab() {
-            // ... (函式內容與您的 React 邏輯保持一致，但轉換為字串模板) ...
-            const Card = (content) => `<div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">${content}</div>`;
-
-            const tableRows = TRIP_DATA.manholeStock.map((item, index) => {
-                const textColorClass = item.highlight ? 'text-red-600 hover:text-red-800' : 'text-indigo-600 hover:text-indigo-800';
-                return `
-                    <tr class="hover:bg-indigo-50/50 transition-colors">
-                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-stone-900">${item.region}</td>
-                        <td class="px-4 py-3">
-                            <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="text-sm font-bold block ${textColorClass}">
-                                ${item.name}
-                            </a>
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-xs">
-                            <span class="text-emerald-600 font-bold">
-                                ${item.hours}
-                            </span>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-
-            return `
-                <div class="animate-fade-in space-y-4">
-                    <h2 class="text-xl font-bold text-stone-800 px-1 flex items-center gap-2">
-                        ${getIconSVG('CreditCard', 24, 'text-amber-500')}
-                        マンホールカード 在庫状況 
-                    </h2>
-                    <p class="text-sm text-stone-600 bg-indigo-50 p-3 rounded-lg border border-indigo-100 flex items-center gap-2">
-                        ${getIconSVG('Info', 16, 'text-indigo-600 shrink-0')}
-                        營業時間為官方提供之資訊，請務必再點擊連結至官方網站確認。
-                    </p>
-
-                    ${Card(`
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-stone-200">
-                                <thead class="bg-stone-50 sticky top-0">
-                                    <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold text-stone-600 uppercase tracking-wider w-1/4">地區</th>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold text-stone-600 uppercase tracking-wider w-1/2">地點 (點擊查詢庫存)</th>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold text-stone-600 uppercase tracking-wider w-1/4">營業時間</th>
+        const ManholeStockStatus = ({ stockData }) => (
+            <div className="animate-fade-in space-y-4">
+                <h2 className="text-xl font-bold text-stone-800 px-1 flex items-center gap-2">
+                    <CreditCard size={24} className="text-amber-500" /> マンホールカード 在庫状況
+                </h2>
+                <p className="text-sm text-stone-600 bg-indigo-50 p-3 rounded-lg border border-indigo-100 flex items-center gap-2">
+                    <Info size={16} className="text-indigo-600 shrink-0"/>營業時間為官方提供之資訊，請務必再點擊連結至官方網站確認。
+                </p>
+                <Card className="p-0">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-stone-200">
+                            <thead className="bg-stone-50 sticky top-0">
+                                <tr>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-stone-600 uppercase tracking-wider w-1/4">地區</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-stone-600 uppercase tracking-wider w-1/2">地點 (點擊查詢庫存)</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-stone-600 uppercase tracking-wider w-1/4">營業時間</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-stone-100">
+                                {stockData.map((item, index) => (
+                                    <tr key={index} className="hover:bg-indigo-50/50 transition-colors">
+                                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-stone-900">{item.region}</td>
+                                        <td className="px-4 py-3">
+                                            <a href={item.url} target="_blank" rel="noopener noreferrer" className={`text-sm font-bold block ${item.highlight ? 'text-red-600 hover:text-red-800' : 'text-indigo-600 hover:text-indigo-800'}`}>
+                                                {item.name}
+                                            </a>
+                                        </td>
+                                        <td className="px-4 py-3 whitespace-nowrap text-xs"><span className="text-emerald-600 font-bold">{item.hours}</span></td>
                                     </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-stone-100">
-                                    ${tableRows}
-                                </tbody>
-                            </table>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </Card>
+            </div>
+        );
+
+        const NavButton = ({ name, url }) => (
+            <a href={url || getGoogleMapUrl(name)} target="_blank" rel="noopener noreferrer" title="目的地導航" className="p-1.5 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors shrink-0">
+                <Navigation size={14} />
+            </a>
+        );
+
+        const NotesView = ({ notes }) => (
+            <div className="space-y-6 animate-fade-in">
+                <h2 className="text-xl font-bold text-stone-800 px-1 flex items-center gap-2">
+                    <NotebookPen size={24} className="text-pink-500" /> 行程備註
+                </h2>
+                {notes.map((day, idx) => (
+                    <Card key={idx} className="p-0 border-l-4 border-l-pink-400">
+                        <div className="bg-stone-50 px-4 py-2 border-b border-stone-100 flex justify-between items-center">
+                            <h3 className="font-bold text-stone-800">{day.date}</h3>
                         </div>
-                    `)}
-                </div>
-            `;
-        }
-        
-        // F. Notes Tab Content
-        function renderNotesTab() {
-            // ... (函式內容與您的 React 邏輯保持一致，但轉換為字串模板) ...
-            const Card = (content) => `<div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">${content}</div>`;
-
-            const notesHtml = TRIP_DATA.notes.map((day, idx) => {
-                const linksHtml = day.links ? day.links.map((link, i) => `
-                    <a 
-                        href="${link.url}" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        class="flex items-center justify-between p-3 bg-white border border-indigo-100 rounded-lg shadow-sm hover:bg-indigo-50 transition-colors group"
-                    >
-                        <div class="flex flex-col">
-                            <span class="text-indigo-700 font-bold flex items-center gap-2">
-                                ${link.title}
-                                ${getIconSVG('ExternalLink', 14, 'opacity-50 group-hover:opacity-100')}
-                            </span>
-                            ${link.note ? `<span class="text-xs text-stone-500 mt-0.5">${link.note}</span>` : ''}
-                        </div>
-                    </a>
-                `).join('') : '';
-
-                const renderNavButton = (name) => `
-                    <a 
-                        href="${getGoogleMapUrl(name)}"
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        title="目的地導航"
-                        class="p-1.5 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors shrink-0"
-                    >
-                        ${getIconSVG('Navigation', 14)}
-                    </a>
-                `;
-
-                let diningListHtml = '';
-                if (day.dining) {
-                    // Simple List Structure
-                    if (day.dining[0].name) {
-                         diningListHtml = `<ul class="space-y-2">
-                             ${day.dining.map((spot, i) => `
-                                <li class="flex justify-between items-center text-sm">
-                                    <div class="flex flex-col">
-                                        <span class="font-bold text-stone-700">${spot.name}</span>
-                                        <span class="text-xs font-mono text-stone-500 bg-white px-1.5 py-0.5 rounded border border-orange-100 w-fit mt-0.5">${spot.hours}</span>
-                                    </div>
-                                    ${renderNavButton(spot.name)}
-                                </li>
-                            `).join('')}
-                         </ul>`;
-                    } 
-                    // Area-based list structure
-                    else if (day.dining[0].area) {
-                        diningListHtml = `<div class="space-y-3">
-                            ${day.dining.map((areaGroup, i) => `
-                                <div>
-                                    <div class="text-xs font-bold text-stone-500 mb-1 border-b border-orange-200 inline-block">${areaGroup.area}</div>
-                                    <ul class="space-y-2 pl-2">
-                                        ${areaGroup.spots.map((spot, j) => `
-                                            <li class="relative flex justify-between items-start">
-                                                <div class="absolute -left-[21px] top-1.5 w-2 h-2 rounded-full bg-orange-300"></div>
-                                                <div class="flex-1 pr-2">
-                                                    <span class="text-stone-700 font-medium">${spot.name}</span>
-                                                    <span class="text-[10px] font-mono text-stone-500">${spot.hours}</span>
-                                                </div>
-                                                ${renderNavButton(spot.name)}
-                                            </li>
-                                        `).join('')}
-                                    </ul>
-                                </div>
-                            `).join('')}
-                        </div>`;
-                    }
-
-                    diningListHtml = `
-                        <div class="bg-orange-50/50 rounded-lg p-3 border border-orange-100">
-                            <h4 class="text-xs font-bold text-orange-600 mb-2 uppercase tracking-wide flex items-center gap-1">
-                                ${getIconSVG('Utensils', 12)} 餐飲資訊
-                            </h4>
-                            ${diningListHtml}
-                        </div>
-                    `;
-                }
-
-                let routesHtml = '';
-                if (day.routes) {
-                    routesHtml = `<div class="space-y-4">
-                        ${day.routes.map((route, i) => `
-                            <div class="bg-sky-50 rounded-lg p-3 border border-sky-100">
-                                <h4 class="font-bold text-sky-800 mb-2 flex items-center gap-2">
-                                    ${getIconSVG('MapPin', 14)} ${route.area}
-                                </h4>
-                                <ul class="space-y-2 relative pl-4 border-l-2 border-sky-200 ml-1">
-                                    ${route.spots.map((spot, j) => `
-                                        <li class="relative flex justify-between items-start">
-                                            <div class="absolute -left-[21px] top-1.5 w-2 h-2 rounded-full bg-sky-300"></div>
-                                            <div class="flex-1 pr-2">
-                                                <div class="text-sm font-bold text-stone-700">${spot.name}</div>
-                                                <div class="text-[10px] text-stone-500 font-mono">${spot.hours}</div>
-                                                ${spot.note ? `<div class="text-[10px] text-amber-600 mt-0.5">${spot.note}</div>` : ''}
+                        <div className="p-4 space-y-4">
+                            {day.links && (
+                                <div className="space-y-2">
+                                    {day.links.map((link, i) => (
+                                        <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 bg-white border border-indigo-100 rounded-lg shadow-sm hover:bg-indigo-50 transition-colors group">
+                                            <div className="flex flex-col">
+                                                <span className="text-indigo-700 font-bold flex items-center gap-2">{link.title}<ExternalLink size={14} className="opacity-50 group-hover:opacity-100" /></span>
+                                                {link.note && <span className="text-xs text-stone-500 mt-0.5">{link.note}</span>}
                                             </div>
-                                            ${renderNavButton(spot.name)}
-                                        </li>
-                                    `).join('')}
-                                </ul>
-                            </div>
-                        `).join('')}
-                    </div>`;
-                }
-
-
-                return Card(`
-                    <div class="p-0 border-l-4 border-l-pink-400">
-                        <div class="bg-stone-50 px-4 py-2 border-b border-stone-100 flex justify-between items-center">
-                            <h3 class="font-bold text-stone-800">${day.date}</h3>
+                                        </a>
+                                    ))}
+                                </div>
+                            )}
+                            {day.dining && (
+                                <div className="bg-orange-50/50 rounded-lg p-3 border border-orange-100">
+                                    <h4 className="text-xs font-bold text-orange-600 mb-2 uppercase tracking-wide flex items-center gap-1"><Utensils size={12} /> 餐飲資訊</h4>
+                                    {day.dining[0].name && (
+                                        <ul className="space-y-2">
+                                            {day.dining.map((spot, i) => (
+                                                <li key={i} className="flex justify-between items-center text-sm">
+                                                    <div className="flex flex-col">
+                                                        <span className="font-bold text-stone-700">{spot.name}</span>
+                                                        <span className="text-xs font-mono text-stone-500 bg-white px-1.5 py-0.5 rounded border border-orange-100 w-fit mt-0.5">{spot.hours}</span>
+                                                        {spot.note && <span className="text-[10px] text-orange-600 mt-0.5">{spot.note}</span>}
+                                                    </div>
+                                                    <NavButton name={spot.name} url={spot.mapUrl} />
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                    {day.dining[0].area && (
+                                        <div className="space-y-3">
+                                            {day.dining.map((areaGroup, i) => (
+                                                <div key={i}>
+                                                    <div className="text-xs font-bold text-stone-500 mb-1 border-b border-orange-200 inline-block">{areaGroup.area}</div>
+                                                    <ul className="space-y-2 pl-2">
+                                                        {areaGroup.spots.map((spot, j) => (
+                                                            <li key={j} className="flex justify-between items-center text-sm">
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-stone-700 font-medium">{spot.name}</span>
+                                                                    <span className="text-[10px] font-mono text-stone-500">{spot.hours}</span>
+                                                                    {spot.note && <span className="text-[10px] text-orange-600 mt-0.5">{spot.note}</span>}
+                                                                </div>
+                                                                <NavButton name={spot.name} url={spot.mapUrl} />
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            {day.routes && (
+                                <div className="space-y-4">
+                                    {day.routes.map((route, i) => (
+                                        <div key={i} className="bg-sky-50 rounded-lg p-3 border border-sky-100">
+                                            <h4 className="font-bold text-sky-800 mb-2 flex items-center gap-2"><MapPin size={14} /> {route.area}</h4>
+                                            <ul className="space-y-2 relative pl-4 border-l-2 border-sky-200 ml-1">
+                                                {route.spots.map((spot, j) => (
+                                                    <li key={j} className="relative flex justify-between items-start">
+                                                        <div className="absolute -left-[21px] top-1.5 w-2 h-2 rounded-full bg-sky-300"></div>
+                                                        <div className="flex-1 pr-2">
+                                                            <div className="text-sm font-bold text-stone-700">{spot.name}</div>
+                                                            <div className="text-[10px] text-stone-500 font-mono">{spot.hours}</div>
+                                                            {spot.note && <div className="text-[10px] text-amber-600 mt-0.5">{spot.note}</div>}
+                                                        </div>
+                                                        <NavButton name={spot.name} url={spot.mapUrl} />
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                        
-                        <div class="p-4 space-y-4">
-                            ${linksHtml}
-                            ${diningListHtml}
-                            ${routesHtml}
-                        </div>
-                    </div>
-                `);
-            }).join('');
+                    </Card>
+                ))}
+            </div>
+        );
 
-            return `
-                <div class="space-y-6 animate-fade-in">
-                    <h2 class="text-xl font-bold text-stone-800 px-1 flex items-center gap-2">
-                        ${getIconSVG('NotebookPen', 24, 'text-pink-500')}
-                        行程備註
-                    </h2>
-                    ${notesHtml}
-                </div>
-            `;
-        }
-
-
-        // --- 5. Main Layout Rendering ---
-
-        // Render Top Header (Header + Date Selector)
-        function renderHeader() {
-            const headerContainer = document.getElementById('header-container');
+        function App() {
+            const [activeTab, setActiveTab] = useState('itinerary');
+            const [selectedDayId, setSelectedDayId] = useState('day1');
+            const scrollContainerRef = useRef(null);
             const currentDayData = TRIP_DATA.itinerary.find(d => d.id === selectedDayId);
-            
-            // A. Header Bar
-            let weatherWidget = '';
-            if (activeTab === 'itinerary' && currentDayData) {
-                weatherWidget = `
-                    <div class="flex items-center gap-2 bg-stone-100 px-3 py-1.5 rounded-full">
-                        ${getWeatherIconHtml(currentDayData.weather)}
-                        <span class="text-sm font-bold text-stone-600">${currentDayData.temp}</span>
-                        <span class="text-xs text-stone-400 pl-1 border-l border-stone-300 ml-1">${currentDayData.location}</span>
-                    </div>
-                `;
-            }
 
-            const headerBar = `
-                <div class="px-4 py-3 flex justify-between items-center">
-                    <div>
-                        <h1 class="text-xl font-black tracking-tighter text-indigo-900">KANSAI TRIP</h1>
-                        <p class="text-xs text-stone-400 font-medium tracking-widest">DEC 27 - JAN 04</p>
-                    </div>
-                    ${weatherWidget}
-                </div>
-            `;
-
-            // B. Date Selector Scroller
-            let dateSelector = '';
-            if (activeTab === 'itinerary') {
-                const buttons = TRIP_DATA.itinerary.map(day => {
-                    const isActive = selectedDayId === day.id;
-                    const classes = isActive 
-                        ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200 scale-105" 
-                        : "bg-white border-stone-200 text-stone-400 hover:border-indigo-300";
-                    
-                    return `
-                        <button
-                            data-day="${day.id}"
-                            onclick="setSelectedDayIdAndRender('${day.id}')"
-                            class="flex-shrink-0 snap-center flex flex-col items-center justify-center w-14 h-16 rounded-xl border transition-all duration-300 ${classes}"
-                        >
-                            <span class="text-[10px] font-medium uppercase leading-none mb-1">${day.date}</span>
-                            <span class="text-lg font-black leading-none">${day.dayOfWeek}</span>
-                        </button>
-                    `;
-                }).join('');
-
-                dateSelector = `
-                    <div id="date-scroller" class="flex overflow-x-auto gap-3 px-4 pb-3 no-scrollbar snap-x">
-                        ${buttons}
-                    </div>
-                `;
-            }
-            
-            headerContainer.innerHTML = headerBar + dateSelector;
-        }
-
-        // Render Main Content Area
-        function renderMainContent() {
-            const contentArea = document.getElementById('main-content-area');
-            let contentHtml = '';
-
-            if (activeTab === 'itinerary') {
-                contentHtml = renderItineraryTab();
-            } else if (activeTab === 'flights') {
-                contentHtml = renderFlightsTab();
-            } else if (activeTab === 'hotels') {
-                contentHtml = renderHotelsTab();
-            } else if (activeTab === 'manhole') {
-                contentHtml = renderManholeStockTab();
-            } else if (activeTab === 'notes') {
-                contentHtml = renderNotesTab();
-            }
-
-            contentArea.innerHTML = contentHtml;
-        }
-
-        // Render Bottom Navigation
-        function renderBottomNav() {
-            const navContainer = document.getElementById('bottom-nav-container');
-            const tabs = [
-                { id: 'itinerary', icon: 'Calendar', label: '行程' },
-                { id: 'flights', icon: 'Plane', label: '航班' },
-                { id: 'hotels', icon: 'Hotel', label: '住宿' },
-                { id: 'manhole', icon: 'CreditCard', label: '在庫' },
-                { id: 'notes', icon: 'NotebookPen', label: '備註', color: 'text-pink-600' }
-            ];
-
-            const buttonsHtml = tabs.map(tab => {
-                const isActive = activeTab === tab.id;
-                const activeClass = isActive ? (tab.color || 'text-indigo-600') : 'text-stone-400';
-                const strokeWidth = isActive ? 2.5 : 2;
-
-                return `
-                    <button 
-                        onclick="setActiveTabAndRender('${tab.id}')"
-                        class="flex flex-col items-center justify-center flex-1 h-full space-y-1 transition-colors ${activeClass}"
-                    >
-                        ${getIconSVG(tab.icon, 20, '', strokeWidth)}
-                        <span class="text-[10px] font-medium">${tab.label}</span>
-                    </button>
-                `;
-            }).join('');
-
-            navContainer.innerHTML = `
-                <div class="flex justify-around items-center h-16">
-                    ${buttonsHtml}
-                </div>
-            `;
-        }
-        
-        // Helper to scroll the date buttons
-        function scrollToSelectedDayButton() {
-            const scrollContainer = document.getElementById('date-scroller');
-            if (scrollContainer) {
-                const selectedBtn = scrollContainer.querySelector(`[data-day="${selectedDayId}"]`);
-                if (selectedBtn) {
-                    selectedBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            useEffect(() => {
+                if (scrollContainerRef.current) {
+                    const selectedBtn = scrollContainerRef.current.querySelector(`[data-day="${selectedDayId}"]`);
+                    if (selectedBtn) {
+                        selectedBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    }
                 }
-            }
+            }, [selectedDayId]);
+
+            useEffect(() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, [activeTab, selectedDayId]);
+
+            return (
+                <div className="bg-stone-100 min-h-screen pb-20 font-sans text-stone-900 md:max-w-md md:mx-auto shadow-2xl overflow-hidden relative">
+                    {/* Header */}
+                    <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
+                        <div className="px-4 py-3 flex justify-between items-center">
+                            <div>
+                                <h1 className="text-xl font-black tracking-tighter text-indigo-900">KANSAI TRIP</h1>
+                                <p className="text-xs text-stone-400 font-medium tracking-widest">DEC 27 - JAN 04</p>
+                            </div>
+                            {activeTab === 'itinerary' && currentDayData && (
+                                <div className="flex items-center gap-2 bg-stone-100 px-3 py-1.5 rounded-full">
+                                    <WeatherIcon type={currentDayData.weather} />
+                                    <span className="text-sm font-bold text-stone-600">{currentDayData.temp}</span>
+                                    <span className="text-xs text-stone-400 pl-1 border-l border-stone-300 ml-1">{currentDayData.location}</span>
+                                </div>
+                            )}
+                        </div>
+                        {activeTab === 'itinerary' && (
+                            <div ref={scrollContainerRef} className="flex overflow-x-auto gap-3 px-4 pb-3 no-scrollbar snap-x">
+                                {TRIP_DATA.itinerary.map((day) => (
+                                    <button
+                                        key={day.id}
+                                        data-day={day.id}
+                                        onClick={() => setSelectedDayId(day.id)}
+                                        className={`flex-shrink-0 snap-center flex flex-col items-center justify-center w-14 h-16 rounded-xl border transition-all duration-300 ${selectedDayId === day.id ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200 scale-105" : "bg-white border-stone-200 text-stone-400 hover:border-indigo-300"}`}
+                                    >
+                                        <span className="text-[10px] font-medium uppercase leading-none mb-1">{day.date}</span>
+                                        <span className="text-lg font-black leading-none">{day.dayOfWeek}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="p-4 space-y-4 min-h-[calc(100vh-180px)]">
+                        {activeTab === 'itinerary' && currentDayData && (
+                            <div className="animate-fade-in-up">
+                                <div className="flex items-center justify-between mb-4 px-1">
+                                    <h2 className="text-lg font-bold text-stone-700">Day {selectedDayId.replace('day', '')} <span className="ml-2 text-sm font-normal text-stone-500">{currentDayData.location}</span></h2>
+                                </div>
+                                {currentDayData.items.map((item, index) => (
+                                    <ItineraryItem key={index} item={item} />
+                                ))}
+                                <div className="h-10"></div>
+                            </div>
+                        )}
+
+                        {activeTab === 'flights' && (
+                            <div className="space-y-4 animate-fade-in">
+                                <h2 className="text-xl font-bold text-stone-800 px-1">航班資訊</h2>
+                                {TRIP_DATA.flights.map((flight, idx) => (
+                                    <Card key={idx} className="p-5">
+                                        <div className="flex items-center justify-between mb-4 border-b border-stone-100 pb-3">
+                                            <span className={`text-xs font-bold px-2 py-1 rounded ${flight.type === 'Departure' ? 'bg-indigo-100 text-indigo-700' : 'bg-orange-100 text-orange-700'}`}>{flight.type === 'Departure' ? '去程' : '回程'}</span>
+                                            <span className="font-mono font-bold text-stone-500">{flight.date}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <div className="text-3xl font-black text-stone-800">{flight.code}</div>
+                                            <Plane className="text-stone-300 rotate-45" />
+                                        </div>
+                                        <div className="text-sm font-medium text-stone-600 mb-4">{flight.airline} • {flight.class}</div>
+                                        <div className="bg-stone-50 p-4 rounded-lg text-center border border-stone-100">
+                                            <div className="text-lg font-bold text-stone-800 mb-1">{flight.route}</div>
+                                            <div className="text-xs text-stone-500">{flight.terminal} • {flight.duration} • {flight.aircraft}</div>
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
+
+                        {activeTab === 'hotels' && (
+                            <div className="space-y-4 animate-fade-in">
+                                <h2 className="text-xl font-bold text-stone-800 px-1">住宿資訊</h2>
+                                {TRIP_DATA.hotels.map((hotel, idx) => (
+                                    <Card key={idx} className="p-0">
+                                        {/* 圖片區域修改 */}
+                                        <div className="h-40 w-full overflow-hidden relative">
+                                            <img 
+                                                src={hotel.image} 
+                                                alt={hotel.name} 
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="p-5">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h3 className="text-lg font-bold text-stone-800 leading-tight w-3/4">{hotel.name}</h3>
+                                                <span className="text-xs bg-stone-100 text-stone-600 px-2 py-1 rounded font-medium whitespace-nowrap">{hotel.dates}</span>
+                                            </div>
+                                            <p className="text-xs text-stone-400 mb-4 font-mono">{hotel.engName}</p>
+                                            <div className="flex items-start gap-2 mb-4 text-sm text-stone-600">
+                                                <MapPin size={16} className="mt-0.5 text-stone-400 shrink-0" />
+                                                <span>{hotel.location}</span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2 mb-4">
+                                                {hotel.features.map((f, i) => (
+                                                    <span key={i} className="text-[10px] px-2 py-1 bg-indigo-50 text-indigo-600 rounded">{f}</span>
+                                                ))}
+                                            </div>
+                                            <div className="bg-amber-50 p-3 rounded text-xs text-amber-800 border border-amber-100 flex gap-2">
+                                                <Info size={14} className="shrink-0 mt-0.5" />
+                                                {hotel.note}
+                                            </div>
+                                            <a 
+                                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hotel.name)}`}
+                                                target="_blank"
+                                                className="mt-4 block w-full py-2 bg-stone-800 text-white text-center rounded-lg text-sm font-bold hover:bg-stone-700 transition"
+                                            >
+                                                導航至飯店
+                                            </a>
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
+
+                        {activeTab === 'manhole' && <ManholeStockStatus stockData={TRIP_DATA.manholeStock} />}
+                        {activeTab === 'notes' && <NotesView notes={TRIP_DATA.notes} />}
+                    </div>
+
+                    {/* Bottom Nav */}
+                    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 md:max-w-md md:mx-auto pb-safe safe-area-bottom z-50">
+                        <div className="flex justify-around items-center h-16">
+                            <button onClick={() => setActiveTab('itinerary')} className={`flex flex-col items-center justify-center flex-1 h-full space-y-1 transition-colors ${activeTab === 'itinerary' ? 'text-indigo-600' : 'text-stone-400'}`}>
+                                <Calendar size={20} strokeWidth={activeTab === 'itinerary' ? 2.5 : 2} /><span className="text-[10px] font-medium">行程</span>
+                            </button>
+                            <button onClick={() => setActiveTab('flights')} className={`flex flex-col items-center justify-center flex-1 h-full space-y-1 transition-colors ${activeTab === 'flights' ? 'text-indigo-600' : 'text-stone-400'}`}>
+                                <Plane size={20} strokeWidth={activeTab === 'flights' ? 2.5 : 2} /><span className="text-[10px] font-medium">航班</span>
+                            </button>
+                            <button onClick={() => setActiveTab('hotels')} className={`flex flex-col items-center justify-center flex-1 h-full space-y-1 transition-colors ${activeTab === 'hotels' ? 'text-indigo-600' : 'text-stone-400'}`}>
+                                <Hotel size={20} strokeWidth={activeTab === 'hotels' ? 2.5 : 2} /><span className="text-[10px] font-medium">住宿</span>
+                            </button>
+                            <button onClick={() => setActiveTab('manhole')} className={`flex flex-col items-center justify-center flex-1 h-full space-y-1 transition-colors ${activeTab === 'manhole' ? 'text-indigo-600' : 'text-stone-400'}`}>
+                                <CreditCard size={20} strokeWidth={activeTab === 'manhole' ? 2.5 : 2} /><span className="text-[10px] font-medium">在庫</span>
+                            </button>
+                            <button onClick={() => setActiveTab('notes')} className={`flex flex-col items-center justify-center flex-1 h-full space-y-1 transition-colors ${activeTab === 'notes' ? 'text-pink-600' : 'text-stone-400'}`}>
+                                <NotebookPen size={20} strokeWidth={activeTab === 'notes' ? 2.5 : 2} /><span className="text-[10px] font-medium">備註</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
         }
 
-        // --- 6. Initialization ---
-        document.addEventListener('DOMContentLoaded', () => {
-            renderApp();
-        });
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
