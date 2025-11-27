@@ -505,9 +505,10 @@
                 const featuresHtml = hotel.features.map(f => `<span class="text-[10px] px-2 py-1 bg-indigo-50 text-indigo-600 rounded">${f}</span>`).join('');
 
                 // 【圖片優化】：使用內聯 style 動態設定圖片
+                // 修改處：將 h-24 改為 h-48 以拉長圖片
                 const imageDiv = `
                     <div 
-                        class="h-24"
+                        class="h-48"
                         style="
                             background-image: url('${hotel.image}'); 
                             background-size: cover; 
