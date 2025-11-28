@@ -13,13 +13,15 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        /* 自定義樣式補充 */
+        /* --- 自定義樣式補充 --- */
         body {
-            background-color: #f5f5f4; /* stone-100 */
+            background-color: #f5f5f4; /* 設定背景色 (Tailwind stone-100) */
         }
+        /* 處理 iPhone 底部安全區域 */
         .pb-safe {
             padding-bottom: env(safe-area-inset-bottom);
         }
+        /* 隱藏滾動條但保留滾動功能 */
         .no-scrollbar::-webkit-scrollbar { 
             display: none;
         }
@@ -27,6 +29,7 @@
             -ms-overflow-style: none; 
             scrollbar-width: none;
         }
+        /* 定義淡入動畫 (Fade In Up) */
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
@@ -43,9 +46,13 @@
     <div id="root"></div>
 
     <script type="text/babel">
+        // 解構 React Hooks
         const { useState, useEffect, useRef } = React;
 
-        // --- Icons Components (模擬 Lucide React) ---
+        // ==========================================
+        // --- 圖示組件區 (Icons Components) ---
+        // 為了不依賴外部圖示庫，這裡直接使用 SVG 定義圖示
+        // ==========================================
         const IconBase = ({ children, className, size = 24, ...props }) => (
             <svg 
                 xmlns="http://www.w3.org/2000/svg" 
@@ -64,6 +71,7 @@
             </svg>
         );
 
+        // 各種特定的圖示定義
         const MapPin = (props) => <IconBase {...props}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></IconBase>;
         const Navigation = (props) => <IconBase {...props}><polygon points="3 11 22 2 13 21 11 13 3 11"/></IconBase>;
         const Utensils = (props) => <IconBase {...props}><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></IconBase>;
@@ -92,7 +100,10 @@
         const ExternalLink = (props) => <IconBase {...props}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></IconBase>;
         const MapIcon = (props) => <IconBase {...props}><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></IconBase>;
 
-        // --- Data Structure ---
+        // ==========================================
+        // --- 資料結構 (Data Structure) ---
+        // 包含航班、飯店、每日行程、人孔蓋庫存、地圖連結與備註
+        // ==========================================
         const TRIP_DATA = {
             flights: [
                 {
@@ -126,7 +137,8 @@
                     location: "滋賀縣草津市 (JR草津站旁)",
                     features: ["交通便利", "美式風格", "適合自駕"],
                     note: "作為滋賀縣人孔蓋卡收集的基地非常合適。",
-                    image: "Boston.jpg", 
+                    image: "Boston.jpg",
+                    imageAlt: "草津波士頓廣場飯店外觀"
                 },
                 {
                     name: "REF 京都八條口 by VESSEL HOTELS",
@@ -136,7 +148,8 @@
                     features: ["大浴場", "現代日式", "免費迎賓飲料"],
                     note: "靠近京都車站，方便前往神戶、奈良與回程機場。",
                     image: "Kyoto.jpg",
-               }
+                    imageAlt: "REF 京都八條口飯店大廳"
+                }
             ],
             itinerary: [
                 {
@@ -169,7 +182,8 @@
                             title: "Kusatsu Yume-Honjin", 
                             tag: "收集", 
                             note: "くさつ夢本陣，領取人孔蓋卡。09:30開門。",
-                            parkingUrl: "https://maps.app.goo.gl/u6ZijyhJJtStz16C8"
+                            parkingUrl: "https://maps.app.goo.gl/u6ZijyhJJtStz16C8",
+                            mapUrl: "https://maps.app.goo.gl/gQ4efFwChjmxP4Gq5?g_st=ipc"
                         },
                         { type: "visit", time: "10:20", title: "栗東観光案内所 (2F)", tag: "收集", note: "位於手原站。注意營業時間至12:00 (通常假日可能有變動，請優先前往)。" },
                         { type: "visit", time: "11:00", title: "守山市駅前総合案内所", tag: "收集", note: "位於守山站。07:30早開。" },
@@ -224,7 +238,8 @@
                             type: "transport", 
                             time: "08:00", 
                             title: "日牟禮八幡宮前 無料駐車場（里道）", 
-                            note: "新年參拜或遊覽八幡堀前停車。"
+                            note: "新年參拜或遊覽八幡堀前停車。",
+                            mapUrl: "https://maps.app.goo.gl/Sk3cyrf86bb4MXxx7?g_st=ipc"
                         },
                         { 
                             type: "visit", 
@@ -289,7 +304,7 @@
                             title: "大鳥大社", 
                             tag: "收集", 
                             note: "大阪堺市。順路參拜。",
-                            mapUrl: "https://www.google.com/maps/search/?api=1&query=大鳥大社" 
+                            mapUrl: "https://maps.app.goo.gl/kyxyYjHMVcdGzBZg6?g_st=ipc" 
                         },
                         { 
                             type: "shop", 
@@ -319,7 +334,14 @@
                     items: [
                         { type: "visit", time: "08:30", title: "春日大社", highlight: "鹿與燈籠", note: "參道上的鹿群很可愛但請小心仙貝。" },
                         { type: "food", time: "11:00", title: "水谷茶屋", highlight: "茅草屋茶屋", note: "拍照超美，推薦烏龍麵或蕨餅。" },
-                        { type: "visit", time: "12:30", title: "東大寺 & 二月堂", highlight: "世界最大木造建築", note: "必看大佛。二月堂可俯瞰奈良市景。" },
+                        { 
+                            type: "visit", 
+                            time: "12:30", 
+                            title: "東大寺 & 二月堂", 
+                            highlight: "世界最大木造建築", 
+                            note: "必看大佛。二月堂可俯瞰奈良市景。",
+                            mapUrl: "https://maps.app.goo.gl/uV4YfjDbdyKA6kJ36?g_st=ipc"
+                        },
                         { type: "visit", time: "13:30", title: "御霊神社", note: "奈良市御霊神社。", mapUrl: "https://maps.app.goo.gl/H4zGYhXNHFs1SHbG7" },
                         { type: "visit", time: "14:30", title: "奈良町南観光案内所", tag: "收集", note: "領取奈良人孔蓋卡。" },
                         { type: "visit", time: "15:30", title: "宇治観光センター", tag: "收集", note: "領取宇治人孔蓋卡。順便逛表參道。" },
@@ -343,7 +365,13 @@
                             note: "寶可夢人孔蓋『鳳王』位於京都（通常在公園或地標前）。",
                             mapUrl: "https://maps.app.goo.gl/rX5RkRCimURC2yaNA"
                         },
-                        { type: "visit", time: "13:00", title: "仁和寺", note: "以御室櫻聞名（雖非花季），皇室淵源深厚。" },
+                        { 
+                            type: "visit", 
+                            time: "13:00", 
+                            title: "仁和寺", 
+                            note: "以御室櫻聞名（雖非花季），皇室淵源深厚。",
+                            mapUrl: "https://maps.app.goo.gl/5YWzcadDHfKG9SeR7?g_st=ipc"
+                        },
                         { type: "visit", time: "15:00", title: "平安神宮", note: "巨大的紅色鳥居。腹地廣大。" },
                         { type: "shop", time: "16:30", title: "Pokemon Center Kyoto", highlight: "藝妓皮卡丘", note: "位於 SUINA 室町 2F。必買京都限定玩偶。" },
                         { 
@@ -488,10 +516,15 @@
             ]
         };
 
-        // --- Helper Functions for Navigation ---
+        // --- 輔助函式 (Helper Functions) ---
+        // 產生 Google Maps 搜尋連結
         const getGoogleMapUrl = (name) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`;
 
-        // --- Components ---
+        // ==========================================
+        // --- 子組件區 (Sub-Components) ---
+        // ==========================================
+
+        // 1. 天氣圖示組件
         const WeatherIcon = ({ type }) => {
             switch (type) {
                 case 'sunny': return <Sun className="w-5 h-5 text-orange-500" />;
@@ -502,31 +535,38 @@
             }
         };
 
+        // 2. 標籤組件 (Tag)
         const Tag = ({ text, color }) => (
             <span className={`text-[10px] px-2 py-0.5 rounded-full border ${color} font-medium mr-2`}>
                 {text}
             </span>
         );
 
+        // 3. 通用卡片容器 (Card)
         const Card = ({ children, className = "" }) => (
             <div className={`bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden ${className}`}>
                 {children}
             </div>
         );
 
-        // Component for an individual item in the itinerary
+        // 4. 行程項目組件 (ItineraryItem) - 負責渲染單一時間點的活動
         const ItineraryItem = ({ item }) => {
+            // 預設圖示設定
             let Icon = MapPin;
             let iconColor = "text-stone-400";
             let borderColor = "border-stone-200";
 
+            // 根據活動類型 (type) 決定圖示與顏色
             if (item.type === 'food') { Icon = Utensils; iconColor = "text-red-400"; borderColor="border-l-red-400"; }
             else if (item.type === 'shop') { Icon = ShoppingBag; iconColor = "text-yellow-500"; borderColor="border-l-yellow-500"; }
             else if (item.type === 'visit') { Icon = Camera; iconColor = "text-emerald-500"; borderColor="border-l-emerald-500"; }
             else if (item.type === 'hotel') { Icon = Hotel; iconColor = "text-purple-400"; borderColor="border-l-purple-400"; }
             else if (item.type === 'transport') {
+                // 特殊交通判斷：是否為特定航班
                 const isFlight = item.title.includes("CX564") || item.title.includes("CX565");
+                // 特殊交通判斷：是否與汽車租賃相關
                 const isCarRelated = item.title.includes("租車") || item.title.includes("還車") || item.title.includes("駐車場");
+                
                 if (isFlight) {
                     Icon = Plane; 
                     iconColor = "text-red-500"; 
@@ -536,12 +576,14 @@
                     iconColor = "text-lime-600";
                     borderColor = "border-l-lime-600";
                 } else { 
+                    // 預設交通 (火車/電車)
                     Icon = Train; 
                     iconColor = "text-indigo-400";
                     borderColor = "border-l-indigo-400";
                 }
             }
 
+            // 特殊標記：是否為人孔蓋收集活動
             const isCollection = item.tag === "收集";
             if (isCollection) {
                 Icon = Star; 
@@ -549,6 +591,7 @@
                 borderColor = "border-l-amber-500";
             }
 
+            // 定義不需要顯示導航按鈕的標題清單
             const titlesWithoutNavigation = [
                 "搭乘 CX564 飛往大阪",
                 "搭乘 CX565 返台",
@@ -556,12 +599,14 @@
                 "前往大阪"
             ];
             
+            // 判斷是否顯示導航按鈕 (排除清單中的項目，且 mapUrl 不為 null)
             const showNavigation = !titlesWithoutNavigation.includes(item.title) && item.mapUrl !== null;
             const googleMapUrl = getGoogleMapUrl(item.title);
             const destinationUrl = item.mapUrl || googleMapUrl; 
             
             return (
                 <div className={`flex gap-4 p-4 bg-white rounded-lg border-l-4 shadow-sm mb-3 ${borderColor}`}>
+                {/* 左側時間與圖示 */}
                 <div className="flex flex-col items-center min-w-[50px]">
                     <span className="text-sm font-bold text-stone-600 font-mono">{item.time}</span>
                     <div className={`mt-2 p-1.5 rounded-full bg-stone-50 ${iconColor}`}>
@@ -570,11 +615,14 @@
                     {isCollection && <span className="text-[9px] text-amber-600 font-bold mt-1">GET!</span>}
                 </div>
                 
+                {/* 右側內容 */}
                 <div className="flex-1">
                     <div className="flex items-start justify-between">
                     <h3 className="font-bold text-stone-800 text-lg leading-tight w-[calc(100%-70px)] sm:w-[calc(100%-110px)]">{item.title}</h3>
                     
+                    {/* 功能按鈕區 */}
                     <div className="flex gap-2 shrink-0"> 
+                        {/* 停車按鈕 (若有 parkingUrl) */}
                         {item.parkingUrl && (
                             <a 
                                 href={item.parkingUrl} 
@@ -587,6 +635,7 @@
                             </a>
                         )}
 
+                        {/* 主要導航按鈕 */}
                         {showNavigation ? (
                         <a 
                             href={destinationUrl} 
@@ -603,18 +652,21 @@
                     </div>
                     </div>
 
+                    {/* 標籤顯示 */}
                     {item.tag && (
                     <div className="mt-1">
                         <Tag text={item.tag} color={isCollection ? "border-amber-400 text-amber-600 bg-amber-50" : "border-stone-300 text-stone-500"} />
                     </div>
                     )}
 
+                    {/* 重點提示 (Highlight) */}
                     {item.highlight && (
                     <div className="mt-2 inline-block px-3 py-1 bg-red-50 text-red-600 text-xs rounded-md font-bold">
                         ★ {item.highlight}
                     </div>
                     )}
 
+                    {/* 備註文字 (Note) */}
                     {item.note && (
                     <p className="mt-2 text-sm text-stone-500 leading-relaxed bg-stone-50 p-2 rounded border border-stone-100">
                         {item.note}
@@ -625,6 +677,7 @@
             );
         };
 
+        // 5. 人孔蓋庫存狀態組件 (ManholeStockStatus)
         const ManholeStockStatus = ({ stockData }) => {
             return (
                 <div className="animate-fade-in space-y-4">
@@ -676,6 +729,7 @@
             );
         };
 
+        // 6. 導航按鈕組件 (NavButton)
         const NavButton = ({ name, url }) => (
             <a 
                 href={url || getGoogleMapUrl(name)}
@@ -688,6 +742,7 @@
             </a>
         );
 
+        // 7. 地圖連結視圖組件 (MapView)
         const MapView = ({ mapLinks }) => {
             return (
                 <div className="space-y-4 animate-fade-in">
@@ -719,6 +774,7 @@
             );
         };
 
+        // 8. 備註視圖組件 (NotesView) - 顯示每日詳細餐飲或路線資訊
         const NotesView = ({ notes }) => {
             if (!notes) return <div className="p-4 text-center text-stone-500">暫無備註資料</div>;
             return (
@@ -736,6 +792,7 @@
                     
                     <div className="p-4 space-y-4">
                         
+                        {/* 連結區塊 */}
                         {day.links && (
                         <div className="space-y-2">
                             {day.links.map((link, i) => (
@@ -758,12 +815,14 @@
                         </div>
                         )}
 
+                        {/* 餐飲列表 */}
                         {day.dining && (
                         <div className="bg-orange-50/50 rounded-lg p-3 border border-orange-100">
                             <h4 className="text-xs font-bold text-orange-600 mb-2 uppercase tracking-wide flex items-center gap-1">
                             <Utensils size={12} /> 餐飲資訊
                             </h4>
                             
+                            {/* 一般列表模式 */}
                             {day.dining[0].name && (
                             <ul className="space-y-2">
                                 {day.dining.map((spot, i) => (
@@ -782,6 +841,7 @@
                             </ul>
                             )}
 
+                            {/* 分區列表模式 (如宮津午餐/晚餐) */}
                             {day.dining[0].area && (
                             <div className="space-y-3">
                                 {day.dining.map((areaGroup, i) => (
@@ -809,6 +869,7 @@
                         </div>
                         )}
 
+                        {/* 路線建議 (1/1 寶可夢/逛街路線) */}
                         {day.routes && (
                         <div className="space-y-4">
                             {day.routes.map((route, i) => (
@@ -844,12 +905,19 @@
             );
         };
 
+        // ==========================================
+        // --- 主應用程式 (Main App) ---
+        // ==========================================
         function App() {
+            // 狀態管理：目前分頁 (行程/航班/飯店...) 與 選擇的日期
             const [activeTab, setActiveTab] = useState('itinerary');
             const [selectedDayId, setSelectedDayId] = useState('day1');
             const scrollContainerRef = useRef(null);
+            
+            // 取得目前選擇日期的資料
             const currentDayData = TRIP_DATA.itinerary.find(d => d.id === selectedDayId);
             
+            // 效果：當日期改變時，自動將上方的日期選擇器捲動到該日期按鈕
             useEffect(() => {
                 if (scrollContainerRef.current) {
                 const selectedBtn = scrollContainerRef.current.querySelector(`[data-day="${selectedDayId}"]`);
@@ -859,6 +927,7 @@
                 }
             }, [selectedDayId]);
 
+            // 效果：當切換分頁或日期時，頁面自動捲動回頂部
             useEffect(() => {
                 window.scrollTo({
                     top: 0,
@@ -869,14 +938,14 @@
             return (
                 <div className="bg-stone-100 min-h-screen pb-20 font-sans text-stone-900 md:max-w-md md:mx-auto shadow-2xl overflow-hidden relative">
                 
-                {/* --- Top Header (Sticky) --- */}
+                {/* --- 頂部固定標題區 (Sticky Header) --- */}
                 <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
                     <div className="px-4 py-3 flex justify-between items-center">
                     <div>
                         <h1 className="text-xl font-black tracking-tighter text-indigo-900">KANSAI TRIP</h1>
                         <p className="text-xs text-stone-400 font-medium tracking-widest">DEC 27 - JAN 04</p>
                     </div>
-                    {/* Current Day Weather Widget */}
+                    {/* 天氣小工具：僅在行程分頁顯示 */}
                     {activeTab === 'itinerary' && currentDayData && (
                         <div className="flex items-center gap-2 bg-stone-100 px-3 py-1.5 rounded-full">
                         <WeatherIcon type={currentDayData.weather} />
@@ -886,7 +955,7 @@
                     )}
                     </div>
 
-                    {/* Date Selector Scroller */}
+                    {/* 日期選擇器滾動條 (僅在行程分頁顯示) */}
                     {activeTab === 'itinerary' && (
                     <div 
                         ref={scrollContainerRef}
@@ -911,9 +980,10 @@
                     )}
                 </div>
 
-                {/* --- Main Content Area --- */}
+                {/* --- 主要內容區域 --- */}
                 <div className="p-4 space-y-4 min-h-[calc(100vh-180px)]">
                     
+                    {/* 1. 行程內容視圖 */}
                     {activeTab === 'itinerary' && currentDayData && (
                         <div className="animate-fade-in-up">
                         <div className="flex items-center justify-between mb-4 px-1">
@@ -929,6 +999,7 @@
                     </div>
                     )}
 
+                    {/* 2. 航班資訊視圖 */}
                     {activeTab === 'flights' && (
                         <div className="space-y-4 animate-fade-in">
                         <h2 className="text-xl font-bold text-stone-800 px-1">航班資訊</h2>
@@ -955,6 +1026,7 @@
                     </div>
                     )}
 
+                    {/* 3. 飯店資訊視圖 */}
                     {activeTab === 'hotels' && (
                     <div className="space-y-4 animate-fade-in">
                         <h2 className="text-xl font-bold text-stone-800 px-1">住宿資訊</h2>
@@ -1005,25 +1077,29 @@
                     </div>
                     )}
                     
+                    {/* 4. 人孔蓋庫存視圖 */}
                     {activeTab === 'manhole' && (
                     <ManholeStockStatus 
                         stockData={TRIP_DATA.manholeStock} 
                     />
                     )}
                     
+                    {/* 5. 地圖連結視圖 */}
                     {activeTab === 'map' && (
                     <MapView mapLinks={TRIP_DATA.mapLinks} />
                     )}
                     
+                    {/* 6. 備註視圖 */}
                     {activeTab === 'notes' && (
                     <NotesView notes={TRIP_DATA.notes} />
                     )}
 
                 </div>
 
-                {/* --- Bottom Navigation --- */}
+                {/* --- 底部導航欄 (Bottom Navigation) --- */}
                 <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 md:max-w-md md:mx-auto pb-safe safe-area-bottom z-50">
                     <div className="flex justify-around items-center h-16">
+                    {/* 各分頁按鈕 */}
                     <button 
                         onClick={() => setActiveTab('itinerary')}
                         className={`flex flex-col items-center justify-center flex-1 h-full space-y-1 transition-colors ${activeTab === 'itinerary' ? 'text-indigo-600' : 'text-stone-400'}`}
@@ -1077,6 +1153,7 @@
             );
         }
 
+        // 渲染應用程式
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
